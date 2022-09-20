@@ -11,6 +11,7 @@ export default function handler(_: NextApiRequest, res: NextApiResponse) {
 
   let movementInterval: NodeJS.Timer;
   let updateInterval: NodeJS.Timer;
+  let pingInterval: NodeJS.Timer;
   bot.on("spawn", () => {
     setBot({
       ping: bot.player.ping,
@@ -25,27 +26,35 @@ export default function handler(_: NextApiRequest, res: NextApiResponse) {
     updateInterval = setInterval(() => {
       setBot({ ...getBot()!, ping: bot.player.ping });
     }, 5000);
+    pingInterval = setInterval(() => {
+      const BASE_URL = process.env.NEXT_PUBLIC_URL || "";
+      fetch(BASE_URL);
+    }, 10 * 60 * 1000);
   });
 
   bot.on("death", () => {
     clearInterval(movementInterval);
     clearInterval(updateInterval);
+    clearInterval(pingInterval);
   });
 
   bot.on("end", () => {
     clearInterval(movementInterval);
     clearInterval(updateInterval);
+    clearInterval(pingInterval);
     setBot(undefined);
   });
 
   bot.on("kicked", () => {
     clearInterval(movementInterval);
     clearInterval(updateInterval);
+    clearInterval(pingInterval);
     setBot(undefined);
   });
   bot.on("error", () => {
     clearInterval(movementInterval);
     clearInterval(updateInterval);
+    clearInterval(pingInterval);
     setBot(undefined);
   });
 
